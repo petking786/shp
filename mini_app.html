@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopee Bot Gratis</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,sans-serif}
+        body{background:#f5f5f7;color:#1d1d1f;min-height:100vh;padding-bottom:70px}
+        .header{background:linear-gradient(135deg,#ff6b35,#ff5252);color:#fff;padding:18px;text-align:center}
+        .header h1{font-size:18px}
+        .alert{background:#fff3cd;border-left:4px solid #ffc107;padding:12px;margin:12px;border-radius:8px;font-size:13px}
+        .container{padding:12px;max-width:480px;margin:0 auto}
+        .card{background:#fff;border-radius:12px;box-shadow:0 2px 10px #0000000f;padding:16px;margin-bottom:12px}
+        .card h2{font-size:15px;margin-bottom:12px;color:#333}
+        input,textarea,button{width:100%;padding:12px;margin:6px 0 10px;border:1px solid #e5e5e7;border-radius:10px;font-size:14px}
+        button{background:#ff6b35;color:#fff;border:none;font-weight:600;cursor:pointer}
+        button:active{background:#e55a2b}
+        .btn-green{background:#10b981}
+        .btn-green:active{background:#0d9668}
+        .tabs{position:fixed;bottom:0;left:0;right:0;background:#fff;display:flex;box-shadow:0 -2px 10px #00000012;z-index:100}
+        .tab{flex:1;padding:10px;text-align:center;font-size:11px;color:#888;cursor-pointer}
+        .tab.active{color:#ff6b35;border-top:2px solid #ff6b35}
+        .page{display:none}
+        .page.active{display:block}
+        .akun-item{padding:12px;background:#f8f9fa;border-radius:8px;margin:8px 0;border-left:3px solid #10b981}
+        .status{padding:10px;border-radius:8px;margin-top:10px;font-size:13px;display:none}
+        .status.ok{background:#d4edda;color:#155724;display:block}
+        .status.err{background:#f8d7da;color:#721c24;display:block}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🛒 Shopee Bot Gratis</h1>
+        <p style="font-size:12px;opacity:0.9">Tanpa Langganan — Selamanya Gratis</p>
+    </div>
+
+    <div class="alert">
+        ⚠️ Checkout WAJIB pakai FINGERPRINT sendiri kecuali Pulsa/Token
+    </div>
+
+    <div class="container">
+        <!-- DASHBOARD -->
+        <div id="dashboard" class="page active">
+            <div class="card">
+                <h2>👤 Halo, Pengguna!</h2>
+                <p style="color:#666;font-size:14px">Status: <span style="color:#10b981">Aktif — Gratis Selamanya</span></p>
+                <p style="color:#888;font-size:13px;margin-top:8px">Jumlah Akun: <span id="jmlAkun">0</span></p>
+            </div>
+            <div class="card">
+                <h2>📋 Tambah Akun Baru</h2>
+                <textarea id="cookies" rows="3" placeholder="Tempel cookies Shopee..."></textarea>
+                <button onclick="tambahAkun()">+ Tambah Akun</button>
+                <div id="statusTambah" class="status"></div>
+            </div>
+        </div>
+
+        <!-- CHECKOUT -->
+        <div id="checkout" class="page">
+            <div class="card">
+                <h2>🛒 Checkout Barang</h2>
+                <label style="font-size:13px;color:#666">Link Produk:</label>
+                <input type="text" id="linkProduk" placeholder="https://shopee.co.id/product/...">
+                <label style="font-size:13px;color:#666">Jumlah:</label>
+                <input type="number" id="jumlah" value="1" min="1">
+                <label style="font-size:13px;color:#666">Varian (opsional):</label>
+                <input type="text" id="varian" placeholder="warna / ukuran">
+                <button onclick="prosesCheckout()">⚡ Checkout Sekarang</button>
+                <div id="statusCheckout" class="status"></div>
+            </div>
+            <div class="card">
+                <h2>⚡ Token PLN / Digital</h2>
+                <label style="font-size:13px;color:#666">Nomor Meter/ID Pelanggan:</label>
+                <input type="text" id="nomorMeter" placeholder="12345678900000">
+                <label style="font-size:13px;color:#666">Nominal:</label>
+                <input type="text" id="nominal" placeholder="20000 / 50000 / 100000">
+                <button class="btn-green" onclick="beliToken()">⚡ Beli Token</button>
+                <div id="statusToken" class="status"></div>
+            </div>
+        </div>
+
+        <!-- PESANAN -->
+        <div id="pesanan" class="page">
+            <div class="card">
+                <h2>📊 Riwayat Pesanan</h2>
+                <div id="riwayatList">
+                    <p style="color:#888;text-align:center;padding:20px">Belum ada pesanan</p>
+                </div>
+            </div>
+            <div class="card">
+                <h2>👤 Daftar Akun</h2>
+                <div id="daftarAkunList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NAVIGASI BAWAH -->
+    <div class="tabs">
+        <div class="tab active" data-page="dashboard">🏠 Dashboard</div>
+        <div class="tab" data-page="checkout">🛒 Checkout</div>
+        <div class="tab" data-page="pesanan">📋 Pesanan</div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        
+        let data = JSON.parse(localStorage.getItem('shopeeBotData') || '{"akun":[],"riwayat":[]}');
+        
+        function simpanData(){
+            localStorage.setItem('shopeeBotData', JSON.stringify(data));
+            updateUI();
+        }
+        
+        function updateUI(){
+            document.getElementById('jmlAkun').textContent = data.akun.length;
+            let html = '';
+            data.akun.forEach(a=>{
+                html += `<div class="akun-item">ID ${a.id} — ${a.nama}<br><small style="color:#666">${a.fp ? '✅ FP Ada' : '⚠️ FP Belum'}</small></div>`;
+            });
+            document.getElementById('daftarAkunList').innerHTML = html || '<p style="color:#888">Belum ada akun</p>';
+            let rhtml = '';
+            data.riwayat.slice(-10).reverse().forEach(r=>{
+                rhtml += `<div class="akun-item">${r.tipe.toUpperCase()}<br><small>${r.waktu}</small></div>`;
+            });
+            document.getElementById('riwayatList').innerHTML = rhtml || '<p style="color:#888;text-align:center;padding:20px">Belum ada pesanan</p>';
+        }
+        
+        function tambahAkun(){
+            const cookies = document.getElementById('cookies').value.trim();
+            if(!cookies) return tampilStatus('statusTambah', '⚠️ Isi cookies dulu!', 'err');
+            data.akun.push({id: data.akun.length+1, nama:`Akun ${data.akun.length+1}`, cookies:cookies, fp:''});
+            simpanData();
+            tampilStatus('statusTambah', '✅ Akun berhasil ditambahkan!', 'ok');
+            document.getElementById('cookies').value = '';
+        }
+        
+        function prosesCheckout(){
+            const link = document.getElementById('linkProduk').value.trim();
+            if(!link) return tampilStatus('statusCheckout', '⚠️ Masukkan link produk!', 'err');
+            data.riwayat.push({tipe:'barang', link:link, jumlah:document.getElementById('jumlah').value, varian:document.getElementById('varian').value||'-', waktu:new Date().toLocaleString('id-ID')});
+            simpanData();
+            tampilStatus('statusCheckout', '✅ Checkout diproses!', 'ok');
+        }
+        
+        function beliToken(){
+            const meter = document.getElementById('nomorMeter').value.trim();
+            const nominal = document.getElementById('nominal').value.trim();
+            if(!meter||!nominal) return tampilStatus('statusToken', '⚠️ Isi nomor meter & nominal!', 'err');
+            data.riwayat.push({tipe:'token-pln', meter:meter, nominal:nominal, waktu:new Date().toLocaleString('id-ID')});
+            simpanData();
+            tampilStatus('statusToken', '✅ Token diproses!', 'ok');
+        }
+        
+        function tampilStatus(id, teks, jenis){
+            const el = document.getElementById(id);
+            el.textContent = teks;
+            el.className = `status ${jenis}`;
+            setTimeout(()=>el.className='status', 4000);
+        }
+        
+        document.querySelectorAll('.tab').forEach(tab=>{
+            tab.addEventListener('click', ()=>{
+                document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+                document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.page).classList.add('active');
+            });
+        });
+        
+        updateUI();
+    </script>
+</body>
+</html>
