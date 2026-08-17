@@ -107,6 +107,7 @@
                 <div class="row"><span>Total:</span><span id="hTotal" style="font-weight:bold;color:#ff5252">-</span></div>
                 <div class="row"><span>Bank:</span><span id="hBank">-</span></div>
                 <div class="row"><span>Nomor VA:</span><span id="hVA" class="va-code">-</span></div>
+                <div class="row" style="border-bottom:none"><span>Status:</span><span id="hCatatan" style="font-size:12px;color:#666">-</span></div>
                 <button id="btnBaru" style="margin-top:16px">🔄 Checkout Baru</button>
             </div>
 
@@ -142,6 +143,7 @@
     <script>
         const tg = window.Telegram.WebApp;
         tg.ready();
+        const API_URL = 'http://127.0.0.1:5000/api';
 
         // DATA
         let akun = JSON.parse(localStorage.getItem('shp_akun') || 'null');
@@ -185,44 +187,69 @@
             </div>`;
         }
 
-        // PROSES CHECKOUT
-        document.getElementById('btnCekout').addEventListener('click', ()=>{
+        // PROSES CHECKOUT — TERHUBUNG KE BOT BACKEND
+        document.getElementById('btnCekout').addEventListener('click', async ()=>{
             if(!akun) return tampil('statCek', '⚠️ Simpan akun dulu!', 'err');
             if(!akun.fp || akun.fp.length<10) return tampil('statCek', '⚠️ FP wajib untuk checkout!', 'err');
             const link = document.getElementById('inpLink').value.trim();
             if(!link) return tampil('statCek', '⚠️ Masukkan link produk!', 'err');
+
+            tampil('statCek', '⏳ Menghubungkan ke Shopee...', 'ok');
 
             // Step 1→2
             document.querySelectorAll('.step').forEach(s=>s.classList.remove('active','done'));
             document.getElementById('st1').classList.add('done');
             document.getElementById('st2').classList.add('active');
 
-            setTimeout(()=>{
+            try {
+                const res = await fetch(`${API_URL}/cekout`, {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({
+                        cookies: akun.cookies,
+                        fp: akun.fp,
+                        link: link,
+                        jumlah: document.getElementById('inpJml').value,
+                        pembayaran: document.getElementById('selBayar').value
+                    })
+                });
+
+                const hasil = await res.json();
+
                 document.getElementById('st2').classList.remove('active');
                 document.getElementById('st2').classList.add('done');
                 document.getElementById('st3').classList.add('active');
+
                 setTimeout(()=>{
                     document.getElementById('st3').classList.remove('active');
                     document.getElementById('st3').classList.add('done');
                     document.getElementById('st4').classList.add('done');
 
-                    const orderId = '278' + Math.floor(Math.random()*9000000000000+1000000000000);
-                    const bank = document.getElementById('selBayar').options[document.getElementById('selBayar').selectedIndex].text;
-                    const va1 = Math.floor(Math.random()*900+100);
-                    const va2 = Math.floor(Math.random()*900000000000+100000000000);
+                    if(hasil.sukses){
+                        document.getElementById('formCek').style.display = 'none';
+                        document.getElementById('boxHasil').classList.add('show');
+                        document.getElementById('hAkun').textContent = hasil.akunId;
+                        document.getElementById('hOrder').textContent = hasil.orderId;
+                        document.getElementById('hTotal').textContent = hasil.total;
+                        document.getElementById('hBank').textContent = hasil.bank;
+                        document.getElementById('hVA').textContent = hasil.vaNumber;
+                        document.getElementById('hCatatan').textContent = hasil.catatan || '';
 
-                    document.getElementById('formCek').style.display = 'none';
-                    document.getElementById('boxHasil').classList.add('show');
-                    document.getElementById('hAkun').textContent = akun.id;
-                    document.getElementById('hOrder').textContent = orderId;
-                    document.getElementById('hTotal').textContent = 'Rp 1.000';
-                    document.getElementById('hBank').textContent = bank;
-                    document.getElementById('hVA').textContent = `${va1} ${va2}`;
-
-                    riwayat.unshift({tipe:'CHECKOUT',orderId,total:'Rp 1.000',bank,waktu:new Date().toLocaleString('id-ID')});
-                    localStorage.setItem('shp_riwayat', JSON.stringify(riwayat));
-                },1500);
-            },1500);
+                        riwayat.unshift({
+                            tipe: 'CHECKOUT', orderId: hasil.orderId, total: hasil.total,
+                            bank: hasil.bank, waktu: new Date().toLocaleString('id-ID')
+                        });
+                        localStorage.setItem('shp_riwayat', JSON.stringify(riwayat));
+                        tampil('statCek', '✅ ' + hasil.pesan, 'ok');
+                    } else {
+                        tampil('statCek', '❌ ' + hasil.pesan, 'err');
+                        document.querySelectorAll('.step').forEach(s=>s.classList.remove('active','done'));
+                    }
+                }, 1000);
+            } catch (e) {
+                tampil('statCek', '⚠️ Bot belum jalan: ' + e.message, 'err');
+                document.querySelectorAll('.step').forEach(s=>s.classList.remove('active','done'));
+            }
         });
 
         // CHECKOUT BARU
@@ -235,14 +262,17 @@
             document.getElementById('inpVar').value = '';
         });
 
-        // BELI TOKEN
+        // BELI TOKEN PLN
         document.getElementById('btnToken').addEventListener('click', ()=>{
             const nomor = document.getElementById('inpNomor').value.trim();
             const nominal = document.getElementById('inpNominal').value.trim();
             if(!nomor || !nominal) return tampil('statToken', '⚠️ Isi nomor & nominal!', 'err');
             if(!akun) return tampil('statToken', '⚠️ Simpan akun dulu!', 'err');
 
-            riwayat.unshift({tipe:'TOKEN-PLN',nomor,nominal,waktu:new Date().toLocaleString('id-ID')});
+            riwayat.unshift({
+                tipe: 'TOKEN-PLN', nomor: nomor, nominal: nominal,
+                waktu: new Date().toLocaleString('id-ID')
+            });
             localStorage.setItem('shp_riwayat', JSON.stringify(riwayat));
             tampil('statToken', '✅ Token diproses!', 'ok');
             document.getElementById('inpNomor').value = '';
@@ -271,5 +301,5 @@
         renderAkun();
     </script>
 </body>
-                                          </html>
-  
+                    </html>
+    
