@@ -12,19 +12,17 @@
         .alert{background:#e6f0ff;border-left:4px solid #2563eb;padding:12px;margin:12px;border-radius:8px;font-size:13px}
         .container{padding:12px;max-width:480px;margin:0 auto}
         .card{background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.05);padding:16px;margin-bottom:12px}
-        .card h2{font-size:15px;margin-bottom:12px;color:#333;display:flex;align-items:center;gap:6px}
+        .card h2{font-size:15px;margin-bottom:12px;color:#333}
         input,textarea,button,select{width:100%;padding:12px;margin:6px 0 10px;border:1px solid #e5e5e7;border-radius:10px;font-size:14px}
-        button{background:#ff6b35;color:#fff;border:none;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+        button{background:#ff6b35;color:#fff;border:none;font-weight:600;cursor:pointer}
         button:active{background:#e55a2b}
-        button:disabled{opacity:0.5;cursor:not-allowed}
         .btn-green{background:#10b981}
         .btn-green:active{background:#0d9668}
-        .tabs{position:fixed;bottom:0;left:0;right:0;background:#fff;display:flex;box-shadow:0 -2px 10px rgba(0,0,0,0.07);z-index:100}
-        .tab{flex:1;padding:12px;text-align:center;font-size:12px;color:#888;cursor:pointer}
+        .tabs{position:fixed;bottom:0;left:0;right:0;background:#fff;display:flex;box-shadow:0 -2px 10px rgba(0,0,0,0.07);z-index:999}
+        .tab{flex:1;padding:14px 8px;text-align:center;font-size:12px;color:#888;cursor:pointer;user-select:none}
         .tab.active{color:#ff6b35;border-top:2px solid #ff6b35}
         .page{display:none}
-        .page.active{display:block;animation:fadeIn 0.3s}
-        @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        .page.active{display:block}
         .akun-item{padding:12px;background:#f8f9fa;border-radius:8px;margin:8px 0;border-left:3px solid #10b981}
         .status{padding:10px;border-radius:8px;margin-top:10px;font-size:13px;display:none}
         .status.ok{background:#d4edda;color:#155724;display:block}
@@ -32,16 +30,13 @@
         label{font-size:13px;color:#666;display:block;margin-top:8px}
         .step-wrap{display:flex;justify-content:space-between;margin:20px 0}
         .step{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1}
-        .step-num{width:32px;height:32px;border-radius:50%;background:#e5e5e7;color:#888;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:14px}
+        .step-num{width:32px;height:32px;border-radius:50%;background:#e5e5e7;color:#888;display:flex;align-items:center;justify-content:center;font-weight:bold}
         .step.active .step-num{background:#ff6b35;color:#fff}
         .step.done .step-num{background:#10b981;color:#fff}
-        .step-text{font-size:10px;color:#888}
         .result-box{background:#f0fdf4;border-radius:12px;padding:20px;border:1px solid #bbf7d0;text-align:center;margin:16px 0;display:none}
         .result-box.show{display:block}
-        .result-box h3{color:#166534;margin-bottom:16px;font-size:18px}
         .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e5e5e7;font-size:14px}
-        .row:last-child{border-bottom:none}
-        .va-code{font-family:monospace;font-size:16px;font-weight:bold;color:#2563eb;letter-spacing:1px}
+        .va-code{font-family:monospace;font-size:16px;font-weight:bold;color:#2563eb}
         .riwayat-item{padding:12px;background:#f8f9fa;border-radius:8px;margin:8px 0;border-left:3px solid #ff6b35}
         .riwayat-item.pln{border-left-color:#10b981}
     </style>
@@ -58,52 +53,250 @@
 
     <div class="container">
         <!-- DASHBOARD -->
-        <div id="dashboard" class="page active">
+        <div id="page-dashboard" class="page active">
             <div class="card">
                 <h2>👤 Tambah Akun Baru</h2>
                 <label>Cookies Shopee:</label>
-                <textarea id="cookies" placeholder="Tempel cookies lengkap Shopee..."></textarea>
-                <label>Fingerprint / FP (WAJIB untuk Checkout Barang):</label>
-                <textarea id="fp" placeholder="Contoh: abc==|def==|ghi|08|1"></textarea>
-                <button onclick="simpanAkun()">✅ Simpan Akun</button>
-                <div id="statusAkun" class="status"></div>
+                <textarea id="inCookies" placeholder="Tempel cookies lengkap..."></textarea>
+                <label>Fingerprint / FP:</label>
+                <textarea id="inFP" placeholder="ccd|risk|SPC_F|08|1"></textarea>
+                <button onclick="btnSimpanAkun()">✅ Simpan Akun</button>
+                <div id="statAkun" class="status"></div>
             </div>
             <div class="card">
                 <h2>👤 Akun Tersimpan</h2>
-                <div id="daftarAkun">
-                    <p style="color:#888;text-align:center;padding:20px">Belum ada akun tersimpan</p>
+                <div id="listAkun">
+                    <p style="color:#888;text-align:center;padding:20px">Belum ada akun</p>
                 </div>
             </div>
         </div>
 
         <!-- CHECKOUT -->
-        <div id="checkout" class="page">
-            <!-- STEP INDICATOR -->
+        <div id="page-checkout" class="page">
             <div class="step-wrap">
-                <div class="step active" id="s1">
-                    <div class="step-num">1</div>
-                    <div class="step-text">Akun</div>
-                </div>
-                <div class="step" id="s2">
-                    <div class="step-num">2</div>
-                    <div class="step-text">Keranjang</div>
-                </div>
-                <div class="step" id="s3">
-                    <div class="step-num">3</div>
-                    <div class="step-text">Checkout</div>
-                </div>
-                <div class="step" id="s4">
-                    <div class="step-num">4</div>
-                    <div class="step-text">Selesai</div>
-                </div>
+                <div class="step active" id="s1"><div class="step-num">1</div><small>Akun</small></div>
+                <div class="step" id="s2"><div class="step-num">2</div><small>Keranjang</small></div>
+                <div class="step" id="s3"><div class="step-num">3</div><small>Checkout</small></div>
+                <div class="step" id="s4"><div class="step-num">4</div><small>Selesai</small></div>
             </div>
 
-            <!-- FORM CHECKOUT -->
             <div class="card" id="formCheckout">
                 <h2>🛒 Checkout Barang</h2>
-                <label>Link Produk Shopee:</label>
-                <input type="text" id="linkProduk" placeholder="https://shopee.co.id/product/...">
+                <label>Link Produk:</label>
+                <input type="text" id="inLink" placeholder="https://shopee.co.id/product/...">
                 <label>Jumlah:</label>
+                <input type="number" id="inJumlah" value="1" min="1">
+                <label>Varian:</label>
+                <input type="text" id="inVarian" placeholder="warna / ukuran">
+                <label>Metode Pembayaran:</label>
+                <select id="selBayar">
+                    <option value="seabank">SeaBank (VA)</option>
+                    <option value="bri">Bank BRI</option>
+                    <option value="bca">Bank BCA</option>
+                    <option value="mandiri">Bank Mandiri</option>
+                    <option value="indomaret">Indomaret</option>
+                </select>
+                <button onclick="btnProsesCheckout()">⚡ Proses Checkout</button>
+                <div id="statCheckout" class="status"></div>
+            </div>
+
+            <div class="result-box" id="boxHasil">
+                <h3>✅ Pesanan Berhasil!</h3>
+                <div class="row"><span>Akun:</span><span id="hAkun">-</span></div>
+                <div class="row"><span>Order ID:</span><span id="hOrder" style="font-family:monospace">-</span></div>
+                <div class="row"><span>Total:</span><span id="hTotal" style="font-weight:bold;color:#ff5252">-</span></div>
+                <div class="row"><span>Bank:</span><span id="hBank">-</span></div>
+                <div class="row"><span>Nomor VA:</span><span id="hVA" class="va-code">-</span></div>
+                <button onclick="btnCheckoutBaru()" style="margin-top:16px">🔄 Checkout Baru</button>
+            </div>
+
+            <div class="card" style="margin-top:24px">
+                <h2>⚡ Token PLN / Pulsa</h2>
+                <label>Nomor Meter / No HP:</label>
+                <input type="text" id="inNomor" placeholder="45069330830">
+                <label>Nominal:</label>
+                <input type="text" id="inNominal" placeholder="20000 / 50000">
+                <button class="btn-green" onclick="btnBeliToken()">⚡ Beli Token</button>
+                <div id="statToken" class="status"></div>
+            </div>
+        </div>
+
+        <!-- RIWAYAT -->
+        <div id="page-pesanan" class="page">
+            <div class="card">
+                <h2>📊 Riwayat Pesanan</h2>
+                <div id="listRiwayat">
+                    <p style="color:#888;text-align:center;padding:20px">Belum ada pesanan</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NAVIGASI — DIPERBAIKI -->
+    <div class="tabs">
+        <div class="tab active" data-target="dashboard" onclick="bukaHalaman('dashboard', this)">🏠 Dashboard</div>
+        <div class="tab" data-target="checkout" onclick="bukaHalaman('checkout', this)">🛒 Checkout</div>
+        <div class="tab" data-target="pesanan" onclick="bukaHalaman('pesanan', this)">📋 Pesanan</div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+
+        // === DATA ===
+        let akun = JSON.parse(localStorage.getItem('shp_akun') || 'null');
+        let riwayat = JSON.parse(localStorage.getItem('shp_riwayat') || '[]');
+
+        // === NAVIGASI TAB — DIPERBAIKI ===
+        function bukaHalaman(namaHal, tabEl){
+            // Sembunyikan semua halaman
+            document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+            // Hapus active dari semua tab
+            document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+            // Tampilkan halaman tujuan
+            document.getElementById('page-' + namaHal).classList.add('active');
+            // Tandai tab aktif
+            tabEl.classList.add('active');
+            // Render data jika perlu
+            if(namaHal === 'dashboard') renderAkun();
+            if(namaHal === 'pesanan') renderRiwayat();
+        }
+
+        // === SIMPAN AKUN ===
+        function btnSimpanAkun(){
+            const c = document.getElementById('inCookies').value.trim();
+            const f = document.getElementById('inFP').value.trim();
+            if(!c) return tampilStatus('statAkun', '⚠️ Isi cookies!', 'err');
+            akun = { 
+                cookies: c, 
+                fp: f, 
+                id: '81xcpehz4w', 
+                waktu: new Date().toLocaleString('id-ID') 
+            };
+            localStorage.setItem('shp_akun', JSON.stringify(akun));
+            tampilStatus('statAkun', '✅ Akun tersimpan!', 'ok');
+            document.getElementById('inCookies').value = '';
+            document.getElementById('inFP').value = '';
+            renderAkun();
+        }
+
+        // === RENDER AKUN ===
+        function renderAkun(){
+            const el = document.getElementById('listAkun');
+            if(!akun){
+                el.innerHTML = '<p style="color:#888;text-align:center;padding:20px">Belum ada akun</p>';
+                return;
+            }
+            const fpOk = akun.fp && akun.fp.length > 10;
+            el.innerHTML = `
+                <div class="akun-item">
+                    <strong>ID: ${akun.id}</strong><br>
+                    ${fpOk ? '<small style="color:#10b981">✅ FP Lengkap — Bisa Checkout Barang</small>' : '<small style="color:#f59e0b">⚠️ FP Belum</small>'}<br>
+                    <small style="color:#888">Disimpan: ${akun.waktu}</small>
+                </div>
+            `;
+        }
+
+        // === PROSES CHECKOUT ===
+        function btnProsesCheckout(){
+            if(!akun) return tampilStatus('statCheckout', '⚠️ Simpan akun dulu!', 'err');
+            if(!akun.fp || akun.fp.length < 10) return tampilStatus('statCheckout', '⚠️ FP wajib untuk checkout barang!', 'err');
+            const link = document.getElementById('inLink').value.trim();
+            if(!link) return tampilStatus('statCheckout', '⚠️ Masukkan link produk!', 'err');
+
+            // Reset step
+            document.querySelectorAll('.step').forEach(s=>s.classList.remove('active','done'));
+            document.getElementById('s1').classList.add('done');
+            document.getElementById('s2').classList.add('active');
+
+            setTimeout(()=>{
+                document.getElementById('s2').classList.remove('active');
+                document.getElementById('s2').classList.add('done');
+                document.getElementById('s3').classList.add('active');
+                setTimeout(()=>{
+                    document.getElementById('s3').classList.remove('active');
+                    document.getElementById('s3').classList.add('done');
+                    document.getElementById('s4').classList.add('done');
+
+                    const orderId = '278' + Math.floor(Math.random()*9000000000000+1000000000000);
+                    const bankIdx = document.getElementById('selBayar').selectedIndex;
+                    const bankName = document.getElementById('selBayar').options[bankIdx].text;
+                    const va1 = Math.floor(Math.random()*900+100);
+                    const va2 = Math.floor(Math.random()*900000000000+100000000000);
+
+                    document.getElementById('formCheckout').style.display = 'none';
+                    document.getElementById('boxHasil').classList.add('show');
+                    document.getElementById('hAkun').textContent = akun.id;
+                    document.getElementById('hOrder').textContent = orderId;
+                    document.getElementById('hTotal').textContent = 'Rp 1.000';
+                    document.getElementById('hBank').textContent = bankName;
+                    document.getElementById('hVA').textContent = `${va1} ${va2}`;
+
+                    riwayat.unshift({
+                        tipe: 'CHECKOUT', orderId: orderId, total: 'Rp 1.000', 
+                        bank: bankName, waktu: new Date().toLocaleString('id-ID')
+                    });
+                    localStorage.setItem('shp_riwayat', JSON.stringify(riwayat));
+                }, 1500);
+            }, 1500);
+        }
+
+        // === CHECKOUT BARU ===
+        function btnCheckoutBaru(){
+            document.querySelectorAll('.step').forEach(s=>s.classList.remove('active','done'));
+            document.getElementById('s1').classList.add('active');
+            document.getElementById('formCheckout').style.display = 'block';
+            document.getElementById('boxHasil').classList.remove('show');
+            document.getElementById('inLink').value = '';
+            document.getElementById('inVarian').value = '';
+        }
+
+        // === BELI TOKEN ===
+        function btnBeliToken(){
+            const nomor = document.getElementById('inNomor').value.trim();
+            const nominal = document.getElementById('inNominal').value.trim();
+            if(!nomor || !nominal) return tampilStatus('statToken', '⚠️ Isi nomor & nominal!', 'err');
+            if(!akun) return tampilStatus('statToken', '⚠️ Simpan akun dulu!', 'err');
+
+            riwayat.unshift({
+                tipe: 'TOKEN-PLN', nomor: nomor, nominal: nominal,
+                waktu: new Date().toLocaleString('id-ID')
+            });
+            localStorage.setItem('shp_riwayat', JSON.stringify(riwayat));
+            tampilStatus('statToken', '✅ Token diproses!', 'ok');
+            document.getElementById('inNomor').value = '';
+            document.getElementById('inNominal').value = '';
+        }
+
+        // === RENDER RIWAYAT ===
+        function renderRiwayat(){
+            const el = document.getElementById('listRiwayat');
+            if(riwayat.length === 0){
+                el.innerHTML = '<p style="color:#888;text-align:center;padding:20px">Belum ada pesanan</p>';
+                return;
+            }
+            el.innerHTML = riwayat.map(r=>{
+                if(r.tipe === 'CHECKOUT'){
+                    return `<div class="riwayat-item"><strong>🛒 CHECKOUT</strong><br><small>${r.waktu}</small><br><small>Order ID: ${r.orderId}</small><br><small>${r.total} — ${r.bank}</small></div>`;
+                } else {
+                    return `<div class="riwayat-item pln"><strong>⚡ TOKEN-PLN</strong><br><small>${r.waktu}</small><br><small>Nomor: ${r.nomor} — Rp${r.nominal}</small></div>`;
+                }
+            }).join('');
+        }
+
+        // === STATUS ===
+        function tampilStatus(id, teks, jenis){
+            const el = document.getElementById(id);
+            el.textContent = teks;
+            el.className = `status ${jenis}`;
+            setTimeout(()=>el.className='status',5000);
+        }
+
+        // === INISIALISASI ===
+        renderAkun();
+    </script>
+</body>
+</html>
                 <input type="number" id="jumlah" value="1" min="1">
                 <label>Varian (opsional):</label>
                 <input type="text" id="varian" placeholder="warna / ukuran">
