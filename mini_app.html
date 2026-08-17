@@ -11,21 +11,22 @@
         .header{background:linear-gradient(135deg,#ff6b35,#ff5252);color:#fff;padding:18px;text-align:center}
         .header h1{font-size:18px}
         .header p{font-size:12px;opacity:0.9;margin-top:4px}
-        .alert{background:#fff3cd;border-left:4px solid #ffc107;padding:12px;margin:12px;border-radius:8px;font-size:13px}
+        .alert{background:#fff3cd;border-left:4px solid #ffc107;padding:12px;margin:12px;border-radius:8px;font-size:13px;line-height:1.5}
         .container{padding:12px;max-width:480px;margin:0 auto}
         .card{background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.05);padding:16px;margin-bottom:12px}
-        .card h2{font-size:15px;margin-bottom:12px;color:#333}
+        .card h2{font-size:15px;margin-bottom:12px;color:#333;display:flex;align-items:center;gap:6px}
         input,textarea,button{width:100%;padding:12px;margin:6px 0 10px;border:1px solid #e5e5e7;border-radius:10px;font-size:14px}
         textarea{resize:vertical;min-height:80px}
-        button{background:#ff6b35;color:#fff;border:none;font-weight:600;cursor:pointer}
+        button{background:#ff6b35;color:#fff;border:none;font-weight:600;cursor:pointer;transition:background 0.2s}
         button:active{background:#e55a2b}
         .btn-green{background:#10b981}
         .btn-green:active{background:#0d9668}
         .tabs{position:fixed;bottom:0;left:0;right:0;background:#fff;display:flex;box-shadow:0 -2px 10px rgba(0,0,0,0.07);z-index:100}
-        .tab{flex:1;padding:10px;text-align:center;font-size:11px;color:#888;cursor-pointer}
+        .tab{flex:1;padding:12px;text-align:center;font-size:12px;color:#888;cursor-pointer;transition:all 0.2s}
         .tab.active{color:#ff6b35;border-top:2px solid #ff6b35}
         .page{display:none}
-        .page.active{display:block}
+        .page.active{display:block;animation:fadeIn 0.3s}
+        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
         .akun-item{padding:12px;background:#f8f9fa;border-radius:8px;margin:8px 0;border-left:3px solid #10b981}
         .status{padding:10px;border-radius:8px;margin-top:10px;font-size:13px;display:none}
         .status.ok{background:#d4edda;color:#155724;display:block}
@@ -40,62 +41,70 @@
     </div>
 
     <div class="alert">
-        ⚠️ Checkout Barang WAJIB pakai FINGERPRINT. Token PLN/Pulsa langsung bisa dipakai.
+        ⚠️ Checkout Barang WAJIB pakai FINGERPRINT sendiri. Token PLN/Pulsa langsung bisa dipakai.
     </div>
 
     <div class="container">
+        <!-- DASHBOARD -->
         <div id="dashboard" class="page active">
             <div class="card">
                 <h2>👤 Halo, Pengguna!</h2>
-                <p>Status: <span style="color:#10b981">Aktif</span></p>
+                <p>Status: <span style="color:#10b981;font-weight:500">Aktif — Gratis Selamanya</span></p>
                 <p style="color:#888;font-size:13px;margin-top:8px">Jumlah Akun: <span id="jmlAkun">0</span></p>
             </div>
             <div class="card">
                 <h2>📋 Tambah Akun Baru</h2>
                 <label>Cookies Shopee:</label>
-                <textarea id="cookies" placeholder="Tempel cookies..."></textarea>
-                <label>Fingerprint (untuk Checkout Barang):</label>
-                <textarea id="fp" placeholder="FP: ccd|risk|SPC_F|08|1"></textarea>
+                <textarea id="cookies" placeholder="Tempel cookies lengkap Shopee..."></textarea>
+                <label>Fingerprint / FP (WAJIB untuk Checkout Barang):</label>
+                <textarea id="fp" placeholder="Contoh: xIx0giZyaNwMo0XV/G7a6w==|4bFB4HKmb2OBj0kDChNqQbaBLucLKdJ61UKG6HWVg5hNPjqkWnJlv+RW9YarunsXDP/Ruk7Nq/KkIxDweJhrZg==|O3j9UnLfbHNHE51y|08|1"></textarea>
                 <button onclick="tambahAkun()">+ Tambah Akun</button>
                 <div id="statusTambah" class="status"></div>
             </div>
             <div class="card">
-                <h2>👤 Daftar Akun</h2>
-                <div id="daftarAkunList"><p style="color:#888">Belum ada akun</p></div>
+                <h2>👤 Daftar Akun Tersimpan</h2>
+                <div id="daftarAkunList">
+                    <p style="color:#888;text-align:center;padding:20px">Belum ada akun. Tambah akun di atas.</p>
+                </div>
             </div>
         </div>
 
+        <!-- CHECKOUT -->
         <div id="checkout" class="page">
             <div class="card">
                 <h2>🛒 Checkout Barang</h2>
-                <label>Link Produk:</label>
-                <input type="text" id="linkProduk" placeholder="https://shopee.co.id/product/...">
+                <label>Link Produk Shopee:</label>
+                <input type="text" id="linkProduk" placeholder="https://shopee.co.id/product/123456789/123456789/">
                 <label>Jumlah:</label>
                 <input type="number" id="jumlah" value="1" min="1">
-                <label>Varian (opsional):</label>
-                <input type="text" id="varian" placeholder="warna / ukuran">
+                <label>Varian (warna/ukuran — opsional):</label>
+                <input type="text" id="varian" placeholder="Contoh: Merah / Ukuran L">
                 <button onclick="prosesCheckout()">⚡ Checkout Sekarang</button>
                 <div id="statusCheckout" class="status"></div>
             </div>
             <div class="card">
-                <h2>⚡ Token PLN / Digital</h2>
-                <label>Nomor Meter / ID Pelanggan:</label>
-                <input type="text" id="nomorMeter" placeholder="12345678900000">
+                <h2>⚡ Token PLN / Pulsa / Digital</h2>
+                <label>Nomor Meter / ID Pelanggan / No HP:</label>
+                <input type="text" id="nomorMeter" placeholder="Contoh: 12345678900000">
                 <label>Nominal:</label>
-                <input type="text" id="nominal" placeholder="20000 / 50000 / 100000">
+                <input type="text" id="nominal" placeholder="Contoh: 20000 / 50000 / 100000">
                 <button class="btn-green" onclick="beliToken()">⚡ Beli Token</button>
                 <div id="statusToken" class="status"></div>
             </div>
         </div>
 
+        <!-- PESANAN / RIWAYAT -->
         <div id="pesanan" class="page">
             <div class="card">
                 <h2>📊 Riwayat Pesanan</h2>
-                <div id="riwayatList"><p style="color:#888;text-align:center;padding:20px">Belum ada pesanan</p></div>
+                <div id="riwayatList">
+                    <p style="color:#888;text-align:center;padding:20px">Belum ada pesanan</p>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- NAVIGASI BAWAH -->
     <div class="tabs">
         <div class="tab active" data-page="dashboard">🏠 Dashboard</div>
         <div class="tab" data-page="checkout">🛒 Checkout</div>
@@ -104,6 +113,156 @@
 
     <script>
         const tg = window.Telegram.WebApp;
+        tg.ready();
+        
+        let data = JSON.parse(localStorage.getItem('shopeeBotData') || '{"akun":[],"riwayat":[]}');
+        
+        function simpanData(){
+            localStorage.setItem('shopeeBotData', JSON.stringify(data));
+            updateUI();
+        }
+        
+        function updateUI(){
+            document.getElementById('jmlAkun').textContent = data.akun.length;
+            
+            let akunHtml = '';
+            if(data.akun.length === 0){
+                akunHtml = '<p style="color:#888;text-align:center;padding:20px">Belum ada akun. Tambah akun di Dashboard.</p>';
+            } else {
+                data.akun.forEach((a, idx) => {
+                    const fpStatus = a.fp && a.fp.length > 10 ? 
+                        '<small style="color:#10b981">✅ FP Lengkap — Bisa Checkout Barang</small>' : 
+                        '<small style="color:#f59e0b">⚠️ FP Belum — Hanya Bisa Token PLN</small>';
+                    akunHtml += `<div class="akun-item">
+                        <strong>ID ${idx + 1} — ${a.nama}</strong><br>
+                        ${fpStatus}
+                    </div>`;
+                });
+            }
+            document.getElementById('daftarAkunList').innerHTML = akunHtml;
+            
+            let rhtml = '';
+            if(data.riwayat.length === 0){
+                rhtml = '<p style="color:#888;text-align:center;padding:20px">Belum ada pesanan</p>';
+            } else {
+                data.riwayat.slice(-10).reverse().forEach(r => {
+                    const icon = r.tipe === 'barang' ? '🛒' : '⚡';
+                    rhtml += `<div class="akun-item">
+                        <strong>${icon} ${r.tipe.toUpperCase()}</strong><br>
+                        <small>${r.waktu}</small>
+                    </div>`;
+                });
+            }
+            document.getElementById('riwayatList').innerHTML = rhtml;
+        }
+        
+        function tambahAkun(){
+            const cookies = document.getElementById('cookies').value.trim();
+            const fp = document.getElementById('fp').value.trim();
+            
+            if(!cookies){
+                tampilStatus('statusTambah', '⚠️ Isi cookies Shopee terlebih dahulu!', 'err');
+                return;
+            }
+            
+            data.akun.push({
+                id: data.akun.length + 1,
+                nama: `Akun ${data.akun.length + 1}`,
+                cookies: cookies,
+                fp: fp
+            });
+            
+            simpanData();
+            tampilStatus('statusTambah', '✅ Akun berhasil ditambahkan!', 'ok');
+            document.getElementById('cookies').value = '';
+            document.getElementById('fp').value = '';
+        }
+        
+        function prosesCheckout(){
+            const link = document.getElementById('linkProduk').value.trim();
+            const jumlah = document.getElementById('jumlah').value;
+            
+            if(!link){
+                tampilStatus('statusCheckout', '⚠️ Masukkan link produk Shopee!', 'err');
+                return;
+            }
+            if(data.akun.length === 0){
+                tampilStatus('statusCheckout', '⚠️ Tambah akun dulu di Dashboard!', 'err');
+                return;
+            }
+            
+            const akunAktif = data.akun[data.akun.length - 1];
+            if(!akunAktif.fp || akunAktif.fp.length < 10){
+                tampilStatus('statusCheckout', '⚠️ Fingerprint belum diisi! Tambahkan FP di Dashboard untuk checkout barang.', 'err');
+                return;
+            }
+            
+            data.riwayat.push({
+                tipe: 'barang',
+                link: link,
+                jumlah: jumlah,
+                waktu: new Date().toLocaleString('id-ID')
+            });
+            simpanData();
+            
+            tampilStatus('statusCheckout', '✅ Data tersimpan! Membuka Shopee...', 'ok');
+            setTimeout(() => {
+                tg.openLink(link);
+            }, 1500);
+        }
+        
+        function beliToken(){
+            const nomor = document.getElementById('nomorMeter').value.trim();
+            const nominal = document.getElementById('nominal').value.trim();
+            
+            if(!nomor || !nominal){
+                tampilStatus('statusToken', '⚠️ Isi nomor meter dan nominal!', 'err');
+                return;
+            }
+            if(data.akun.length === 0){
+                tampilStatus('statusToken', '⚠️ Tambah akun dulu di Dashboard!', 'err');
+                return;
+            }
+            
+            data.riwayat.push({
+                tipe: 'token-pln',
+                nomor: nomor,
+                nominal: nominal,
+                waktu: new Date().toLocaleString('id-ID')
+            });
+            simpanData();
+            
+            tampilStatus('statusToken', '✅ Token diproses! Cek aplikasi Shopee.', 'ok');
+            document.getElementById('nomorMeter').value = '';
+            document.getElementById('nominal').value = '';
+        }
+        
+        function tampilStatus(id, teks, jenis){
+            const el = document.getElementById(id);
+            el.textContent = teks;
+            el.className = `status ${jenis}`;
+            setTimeout(() => {
+                el.className = 'status';
+            }, 5000);
+        }
+        
+        // NAVIGASI TAB — DIPERBAIKI
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Hapus active dari semua tab & page
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                // Tambah active ke yang diklik
+                tab.classList.add('active');
+                const pageId = tab.getAttribute('data-page');
+                document.getElementById(pageId).classList.add('active');
+            });
+        });
+        
+        updateUI();
+    </script>
+</body>
+</html>
         tg.ready();
         
         let data = JSON.parse(localStorage.getItem('shopeeBotData') || '{"akun":[],"riwayat":[]}');
